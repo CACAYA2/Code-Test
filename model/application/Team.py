@@ -1,3 +1,5 @@
+from model.exception.FillException import FillException
+from model.exception.InvalidSigningException import InvalidSigningException
 class Team:
     REQUIRED_TEAM_SIZE = 5
 
@@ -21,6 +23,34 @@ class Team:
 
     def get_all_players(self):
         return self.all_players
+    
+    def get_current_team(self): 
+        return self.current_team
+    
+    def add_player(self, player):
+        if player not in self.all_players.get_players():
+            self.all_players.add(player)
+
+    def remove_player(self, player):
+        if self.is_player_in_active_team(player):
+            raise InvalidSigningException("Player is in the active team and cannot be unsigned.")
+        self.all_players.remove(player)
+        player.set_team(None)
+
+    def is_player_in_active_team(self, player):
+        return player in self.current_team
+
+    def assign_player_to_position(self, player, position_index):
+        if self.is_player_in_active_team(player) and self.current_team.index(player) != position_index:
+            raise FillException("This player is already assigned to another position.")
+        self.current_team[position_index] = player
+
+    def unassign_player_from_position(self, position_index):
+        self.current_team[position_index] = None
+
 
     def __str__(self):
         return self.local_name + " " + self.team_name
+    
+    def get_jersey_filename(self):
+        return f"{self.team_name.lower()}.png"

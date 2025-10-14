@@ -2,6 +2,8 @@ from model.application import Team
 from model.exception.UnauthorisedAccessException import UnauthorisedAccessException
 from model.utils.SeedData import seeded_data
 from model.application.Teams import Teams
+from model.exception.InvalidSigningException import InvalidSigningException
+
 
 class League:
     def __init__(self, seeded_teams, seeded_players, seeded_managers):
@@ -29,6 +31,7 @@ class League:
     def set_manager_for_team(self, manager, team):
         """
         Assigns a manager to a new team
+
 
         Parameters:
             manager (Manager.Manager): The manager to assign to the team
@@ -63,6 +66,7 @@ class League:
     def validate_manager(self, id):
         """
         Confirms that the id is a valid manager id
+        
 
         Parameters:
             id (int): The id to compare with
@@ -71,9 +75,31 @@ class League:
         Raises:
             UnauthorisedAccessException: If there is no manager in the League with the provided id
         """
+        try:
+            id = int(id)
+        except (ValueError, TypeError):
+            raise UnauthorisedAccessException("Incorrect format for manager id")
+        
         for manager in self.managers:
             if manager.has_id(id):
                 return manager
         raise UnauthorisedAccessException("Invalid manager credentials")
+    
+    def sign_player_to_team(self, player_name, team):
+        player = self.players.player(player_name)
+        
+        if player is None:
+            raise InvalidSigningException(f"Player '{player_name}' does not exist in the league.")
+        
+        if player.get_team() is not None:
+            if player.get_team() == team:
+                raise InvalidSigningException(f"Player '{player_name}' is already signed to this team.")
+            else:
+                raise InvalidSigningException(f"Player '{player_name}' is signed to a different club.")
+        
+        team.add_player(player)
+        player.set_team(team)
+    
+    
 
 league = League(seeded_data.get_teams(), seeded_data.get_players(), seeded_data.get_managers())

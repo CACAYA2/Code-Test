@@ -6,47 +6,67 @@ from PIL import ImageTk
 #You will never have to manually call this, It's used as part of one of the static methods
 class ObservableButton(Button):
     def __init__(self, root, text, callback, main_color, hover_color):
-        Button.__init__(self, root, text=text, command=callback, background=main_color, padx=0, relief=FLAT,
-                   font="Arial 11 bold", foreground="white")
-        self.bind("<Enter>", self.on_hover)
-        self.bind("<Leave>", self.on_exit)
+        super().__init__(root, text=text, command=callback)
         self.main_color = main_color
         self.hover_color = hover_color
+        
+        self.configure(
+            relief=FLAT,                  
+            font="Helvetica 12 bold",      
+            foreground="white",           
+            background=self.main_color,    
+            activebackground=self.hover_color, 
+            activeforeground="white",          
+            pady=5,
+            highlightthickness=0, 
+            bd=0                        
+        )
+
+        self.bind("<Enter>", self.on_hover)
+        self.bind("<Leave>", self.on_exit)
 
     def on_hover(self, event):
-        self["background"] = self.hover_color
+         if self['state'] == NORMAL:
+            self.config(background=self.hover_color)
 
     def on_exit(self, event):
-        self["background"] = self.main_color
+        self.config(background=self.main_color)
 
 #You will never have to manually call this, It's used as part of one of the static methods
 class ToolTip:
-    """
-    Attribution:
-        Adapted from: https://stackoverflow.com/a/65524559
-    Changes made:
-        Minor syntax changes and geometry offset changed from 15 to none
-    """
-    def __init__(self,root,text=None):
+    def __init__(self, widget):
+        self.widget = widget
+        self.tip_window = None
 
-        self.tooltip = None
-        self.root=root
-        self.text=text
+    def showtip(self, text_func):
+        text = text_func() 
+        if self.tip_window or not text:
+            return
+        x, y, _, _ = self.widget.bbox("insert")
+        x = x + self.widget.winfo_rootx() + 25
+        y = y + self.widget.winfo_rooty() + 20
+        self.tip_window = tw = Toplevel(self.widget)
+        tw.wm_overrideredirect(1)
+        tw.wm_geometry(f"+{x}+{y}")
+        label = Label(tw, text=text, justify=LEFT,
+                      background="#ffffe0", relief=SOLID, borderwidth=1,
+                      font=("tahoma", "8", "normal"))
+        label.pack(ipadx=1)
 
-        def on_enter(event):
-            self.tooltip=Toplevel(root)
-            self.tooltip.overrideredirect(True)
-            self.tooltip.geometry(f'+{event.x_root}+{event.y_root}')
-            Label(self.tooltip,text=self.text).pack()
+    def hidetip(self):
+        tw = self.tip_window
+        self.tip_window = None
+        if tw:
+            tw.destroy()
 
-        def on_leave(event):
-            self.tooltip.destroy()
+def create_tooltip(widget, text_func):
+    tool_tip = ToolTip(widget)
+    widget.bind('<Enter>', lambda event: tool_tip.showtip(text_func))
+    widget.bind('<Leave>', lambda event: tool_tip.hidetip())
 
-        self.root.bind('<Enter>', on_enter)
-        self.root.bind('<Leave>', on_leave)
 
 class TkUtils:
-    red = "#ff8f8f"
+    red = "#ff4747"
     image_width = 540
     image_height = 300
 
@@ -61,7 +81,6 @@ class TkUtils:
         window = Tk()
         window.resizable(False, False)
         window.title("Login")
-        window.configure(background="#d9d9d9")
         return window
 
     #Some operating systems struggle to automatically stretch the window
@@ -199,7 +218,7 @@ class TkUtils:
         """
         Generates a prestyled treeview according to the assignment specifications.
 
-        Parameters:
+        Para)meters:
             root (tk.Tk): The window or frame containing the treeview.
             columns (list): A list of column names.
             multi (bool, optional): Whether the tree view is multi-column or not. Defaults to browse (single) mode
@@ -217,13 +236,4 @@ class TkUtils:
         tree.bind("<Button-1>", lambda event: TkUtils._select(event, tree))
         return tree
 
-    @staticmethod
-    def attach_tooltip(element, text):
-        """
-        Attaches a tooltip for a given element
-
-        Parameters:
-            element (tk.Tk): The element to generate a tooltip for.
-            text (str): The text to display.
-        """
-        ToolTip(element, text)
+    
