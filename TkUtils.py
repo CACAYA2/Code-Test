@@ -11,15 +11,18 @@ class ObservableButton(Button):
         self.hover_color = hover_color
         
         self.configure(
-            relief=FLAT,                  
+            # relief=FLAT,                  
             font="Helvetica 12 bold",      
             foreground="white",           
-            background=self.main_color,    
-            activebackground=self.hover_color, 
+            # background=self.main_color,    
+            # activebackground=self.hover_color, 
+            background=self.main_color,
             activeforeground="white",          
             pady=5,
-            highlightthickness=0, 
-            bd=0                        
+            
+            relief=FLAT,  
+            bd=0,
+            highlightthickness=0,                         
         )
 
         self.bind("<Enter>", self.on_hover)
