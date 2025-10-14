@@ -3,37 +3,68 @@ from tkinter import ttk
 from PIL import Image
 from PIL import ImageTk
 
-#You will never have to manually call this, It's used as part of one of the static methods
-class ObservableButton(Button):
+
+
+class ObservableButton(Label):
     def __init__(self, root, text, callback, main_color, hover_color):
-        super().__init__(root, text=text, command=callback)
+        super().__init__(root, text=text)
         self.main_color = main_color
         self.hover_color = hover_color
+        self.callback = callback
         
         self.configure(
-            # relief=FLAT,                  
-            font="Helvetica 12 bold",      
-            foreground="white",           
-            # background=self.main_color,    
-            # activebackground=self.hover_color, 
+            font="Helvetica 12 bold",
+            foreground="white",
             background=self.main_color,
-            activeforeground="white",          
             pady=5,
-            
-            relief=FLAT,  
-            bd=0,
-            highlightthickness=0,                         
+            # This is a label 
         )
 
         self.bind("<Enter>", self.on_hover)
         self.bind("<Leave>", self.on_exit)
+        self.bind("<Button-1>", self.on_click) # Manually handle the click
 
     def on_hover(self, event):
-         if self['state'] == NORMAL:
-            self.config(background=self.hover_color)
+        #No  need to check for state on a Label
+        self.config(background=self.hover_color)
 
     def on_exit(self, event):
         self.config(background=self.main_color)
+        
+    def on_click(self, event):
+        if self.callback:
+            self.callback()
+
+
+#You will never have to manually call this, It's used as part of one of the static methods
+# class ObservableButton(Button):
+#     def __init__(self, root, text, callback, main_color, hover_color):
+#         print("--- INITIALIZING NEW CUSTOM BUTTON ---")
+#         super().__init__(root, text=text, command=callback)
+#         self.main_color = main_color
+#         self.hover_color = hover_color
+        
+#         self.configure(                 
+#             font="Helvetica 12 bold",      
+#             foreground="white",           
+#             background=self.main_color,    
+#             activebackground=self.hover_color, 
+#             activeforeground="white",          
+#             pady=5,
+#             relief=FLAT,  
+#             bd=0,
+#             highlightthickness=0,                         
+#         )
+
+#         self.bind("<Enter>", self.on_hover)
+#         self.bind("<Leave>", self.on_exit)
+
+#     def on_hover(self, event):
+#          if self['state'] == NORMAL:
+#             self.config(background=self.hover_color)
+
+#     def on_exit(self, event):
+#         self.config(background=self.main_color)
 
 #You will never have to manually call this, It's used as part of one of the static methods
 class ToolTip:
