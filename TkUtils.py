@@ -134,7 +134,7 @@ class TkUtils:
         Returns:
             A tk.Button() object, prestyled and preconfigured.
         """
-        return ObservableButton(root, text_, callback, TkUtils.red, "#ff8080")
+        return ObservableButton(root, text_, callback,  "#F08080", "#FF9999")
 
     @staticmethod
     def separator(root):

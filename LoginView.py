@@ -59,7 +59,7 @@ class LoginView:
 
         self.login_button = ut.button(btn_frame, "Login", self.login)
         self.login_button.grid(row=0, column=0, sticky="nsew") 
-        self.login_button.config(state=DISABLED)
+        
         
         ut.button(btn_frame, "Exit", self.root.destroy).grid(row=0, column=1, sticky="nsew")
         btn_frame.pack(side=BOTTOM, fill=X, expand=False)
