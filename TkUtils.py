@@ -154,34 +154,9 @@ class TkUtils:
 
     @staticmethod
     def treeview(root, columns, multi=False, width=500):
-        
-        style = ttk.Style()
-        try:
-            style.theme_use("clam")
-        except Exception:
-            style.theme_use("default")
-
-        style.configure(
-            "Treeview",
-            background="white",
-            fieldbackground="white",
-            foreground="black",
-            rowheight=25,
-        )
-        style.map('Treeview', background=[('selected', '#0078D7')])
-        style.configure(
-            "Treeview.Heading",
-            background="#F0F0F0",
-            foreground="black",
-            font=("Helvetica", 10, "normal"),
-            relief="flat"
-        )
-        style.map("Treeview.Heading", background=[('active', '#E0E0E0')])
-
         tree = ttk.Treeview(
             root,
             show="headings",
-            height=12,
             columns=columns,
             selectmode="extended" if multi else "browse"
         )
