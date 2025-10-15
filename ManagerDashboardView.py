@@ -91,7 +91,7 @@ class ManagerDashboardView:
         if self.manager.get_team():
             self.root.withdraw()
             new_root = ut.top_level("Team Dashboard")
-            new_root.geometry("800x600")
+            # new_root.geometry("800x600")
             # Pass only three arguments: root, model, and team
             TeamDashboardView(new_root, self.model, self.manager.get_team()).setup()
     
