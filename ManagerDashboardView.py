@@ -31,7 +31,13 @@ class ManagerDashboardView:
         self.jersey_label.pack(pady=10)
 
 
+
+
+
+
         
+
+
         # button_frame = Frame(self.root)
         # button_frame.pack(side=BOTTOM, fill=X)
         
@@ -45,6 +51,7 @@ class ManagerDashboardView:
         # ut.button(button_frame, "Close", self.close).pack(side=LEFT, expand=True, fill=X)
         
         # 1. Frame for Withdraw and Manage buttons (under jersey icon)
+
         jersey_button_frame = Frame(self.root)
         jersey_button_frame.pack(pady=(0, 10))
         
