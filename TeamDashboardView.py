@@ -7,6 +7,8 @@ from model.exception.InvalidSigningException import InvalidSigningException
 from model.exception.FillException import FillException
 from ErrorView import ErrorView
 
+
+
 class TeamDashboardView:
     def __init__(self, root, model, team):
         self.root = root
@@ -29,6 +31,7 @@ class TeamDashboardView:
         self.COLOR_ACCENT = "#0078D7"
         self.COLOR_ACCENT_FG = "#FFFFFF"
         self.COLOR_PINK = "#E87A7A"
+        
 
     def setup(self):
         self.root.title("Team Dashboard")
@@ -41,19 +44,37 @@ class TeamDashboardView:
         self.root.grid_rowconfigure(1, weight=1) # The content row will expand
 
         # ============================ HEADER ============================
-        header = Frame(self.root, bg=self.COLOR_BG)
+        header = Frame(self.root, bg=self.COLOR_BG, borderwidth=0, highlightthickness=0)
+        
         header.grid(row=0, column=0, sticky="ew")
         header.grid_columnconfigure(0, weight=1)
 
-        # REFINED: 2. Reduce banner height to give more space to the content below.
-        # Changed height from the default to a smaller value (e.g., 200).
-        banner = ut.image(self.root, "image/banner.png", width=960, height=200, background=self.COLOR_BG)
-        banner.pack(in_=header, pady=(10, 5))
+       
+        
 
-        ut.separator(self.root).grid(row=0, column=0, sticky="s", pady=(5,0))
+        self._banner_target_h = 200
+        self._banner_img_orig = Image.open("image/banner.png")  
+        self._banner_lbl = Label(header, bg=self.COLOR_BG, bd=0, highlightthickness=0)
+        self._banner_lbl.pack(fill="x")  
+        Frame(header, bg="black", height=1, bd=0, highlightthickness=0).pack(fill="x")
+
+        def _resize_banner(event):
+            w = max(event.width, 1)                
+            h = self._banner_target_h              
+            
+            banner_rs = self._banner_img_orig.resize((w, h), Image.LANCZOS)
+            self._banner_photo = ImageTk.PhotoImage(banner_rs)
+            self._banner_lbl.configure(image=self._banner_photo)
+
+       
+        header.bind("<Configure>", _resize_banner)
+
+        
         
         team_name_label = Label(header, text=str(self.team), bg=self.COLOR_BG, fg=self.COLOR_PINK, font=("Helvetica", 16, "bold"))
         team_name_label.pack(pady=10)
+        
+        ttk.Separator(header, orient='horizontal', style="Black.TSeparator").pack(fill='x',pady=(5, 15))
 
         # ============================ CONTENT BODY ============================
         content = Frame(self.root, bg=self.COLOR_BG)
@@ -78,43 +99,10 @@ class TeamDashboardView:
         entry.pack(side=LEFT)
         self.sign_btn = ut.button(sign_row, "Sign", self.sign_player)
         self.sign_btn.pack(side=LEFT, padx=10)
-        self.sign_btn.config(state=DISABLED)
-
-        # # --- Left Panel: Player List ---
-        # # REFINED: 3. This panel will now be taller due to the smaller banner.
-        # left_panel = Frame(content, bg=self.COLOR_BG, highlightbackground=self.COLOR_BORDER, highlightthickness=1)
-        # left_panel.grid(row=1, column=0, sticky="nsew", padx=(0, 10))
-
-
-        # # left_panel.grid_columnconfigure(0, weight=1)
-        # # left_panel.grid_rowconfigure(0, weight=1)
-
-        # style = ttk.Style()
-        # style.theme_use("clam")
-        # style.configure("Treeview", background=self.COLOR_BG, fieldbackground=self.COLOR_BG, foreground=self.COLOR_TEXT, rowheight=28, relief="none", borderwidth=0)
-        # style.map('Treeview', background=[('selected', self.COLOR_ACCENT)], foreground=[('selected', self.COLOR_ACCENT_FG)])
-        # style.configure("Treeview.Heading", background=self.COLOR_HEADER_BG, foreground=self.COLOR_PINK,font=("Helvetica", 16, "bold"), relief="flat")
-        # self.player_tree = ttk.Treeview(left_panel, show="headings", columns=("Name", "Position"), selectmode="browse",height=15)
-      
-      
-        # # self.player_tree.column("Name", anchor="w", width=250, stretch=True)
-        # # self.player_tree.column("Position", anchor="center", width=150, stretch=True)
-
-        # self.player_tree.column("Name", anchor="w", width=180, stretch=False)
-        # self.player_tree.column("Position", anchor="center", width=180, stretch=False)
+        self.sign_btn.configure(padx=14)
         
-        
-        # self.player_tree.heading("Name", text="Name", anchor="w")
-        # self.player_tree.heading("Position", text="Position", anchor="center")
-        # self.player_tree.bind("<<TreeviewSelect>>", self.on_player_select)
-        # self.player_tree.pack(fill="x", expand=False, padx=1, pady=1)
 
-
-        # --- Left Panel: Player List ---
-        # --- Left Panel: Player List ---
-        # --- Left Panel: Player List ---
-  # --- Left Panel: Player List ---
-                # --- Left Panel: Player List ---
+       
         left_panel = Frame(content, bg=self.COLOR_BG,
                         highlightbackground=self.COLOR_BORDER, highlightthickness=1)
         left_panel.grid(row=1, column=0, sticky="nsew", padx=(0, 10))
@@ -124,7 +112,7 @@ class TeamDashboardView:
         style = ttk.Style()
         style.theme_use("clam")
 
-# 行高/字体（内容）
+
         style.configure("Players.Treeview",
             background=self.COLOR_BG,
             fieldbackground=self.COLOR_BG,
@@ -133,13 +121,13 @@ class TeamDashboardView:
             rowheight=22,
             borderwidth=0
         )
-        # 选中样式
+
         style.map("Players.Treeview",
             background=[('selected', self.COLOR_ACCENT)],
             foreground=[('selected', self.COLOR_ACCENT_FG)]
         )
 
-        # 表头样式 —— 与 “Sign a new player” 保持一致（粉色、16、bold）
+
         style.configure("Players.Treeview.Heading",
             background="#f1f1f1",
             foreground=self.COLOR_PINK,
@@ -148,7 +136,9 @@ class TeamDashboardView:
             relief="flat"
         )
 
-# 不要滚动条：不创建 Scrollbar，也不设置 yscrollcommand
+        style.configure("Black.TSeparator", background='black')
+
+
         self.player_tree = ttk.Treeview(
             left_panel,
             style="Players.Treeview",
@@ -158,20 +148,29 @@ class TeamDashboardView:
         )
         self.player_tree.grid(row=0, column=0, sticky="nsew")
 
-# 表头与单元格都居中；两列都允许拉伸
+
         self.player_tree.heading("Name", text="Name", anchor="center")
         self.player_tree.heading("Position", text="Position", anchor="center")
         self.player_tree.column("Name", anchor="center", stretch=True, width=200)
         self.player_tree.column("Position", anchor="center", stretch=True, width=200)
 
-# 斑马纹
+
         self.player_tree.tag_configure("even", background=self.COLOR_BG)
         self.player_tree.tag_configure("odd",  background="#fafafa")
 
-# 随容器尺寸变化时，自动把两列调成等宽
         self.player_tree.bind("<Configure>", self._on_tree_resize)
 
         self.player_tree.bind("<<TreeviewSelect>>", self.on_player_select)
+
+        DIVIDER_COLOR = "#cfcfcf"  
+        self._midline = Frame(left_panel, bg=DIVIDER_COLOR, width=1)
+
+        self._midline.place(relx=0.5, rely=0, relheight=1, anchor="n")
+
+        self._midline.lift(self.player_tree)
+
+
+        left_panel.bind("<Configure>", lambda e: self._midline.place_configure(relx=0.5, rely=0, relheight=1, anchor="n"))
 
 
 
@@ -190,17 +189,16 @@ class TeamDashboardView:
         right_panel.grid_columnconfigure(0, weight=1)
         right_panel.grid_rowconfigure(1, weight=1)
 
-        # 1. 修正：创建 Active Team 标题栏
+
         title = Frame(right_panel, bg="black", height=40)
-        title.grid(row=0, column=0, sticky="ew") # 使用 grid 布局
+        title.grid(row=0, column=0, sticky="ew") 
         title.pack_propagate(False)
         title.grid_columnconfigure(0, weight=1)
         active_team_label = Label(title, text="Active Team", bg="black", fg=self.COLOR_PINK, font=("Helvetica", 16, "bold"))
         active_team_label.grid(row=0, column=0)
 
-        # 2. 修正：创建球衣区域的 body，并统一使用 grid 布局
         body = Frame(right_panel, bg=self.COLOR_BG)
-        body.grid(row=1, column=0, sticky="nsew", padx=20, pady=20) # 使用 grid 布局
+        body.grid(row=1, column=0, sticky="nsew", padx=20, pady=20) 
 
         team_jersey_path = f"image/{self.team.get_jersey_filename()}"
         self.team_jersey_img = ut.image(self.root, team_jersey_path, height=64, width=64).photo
@@ -222,14 +220,14 @@ class TeamDashboardView:
 
         # ============================ FOOTER ============================
         footer = Frame(self.root, bg=self.COLOR_BG)
-# 关键：padx 从 20 改成 0，pady 也可收紧
+
         footer.grid(row=2, column=0, sticky="ew", padx=0, pady=(10, 0))
 
-        # 两列等宽
+
         footer.grid_columnconfigure(0, weight=1)
         footer.grid_columnconfigure(1, weight=1)
 
-        # 左右按钮贴边，中间留一点间距；只横向拉伸，保持原有高度(ipady)
+
         self.unsign_button = ut.button(footer, "Unsign", self.unsign_player)
         self.unsign_button.grid(row=0, column=0, sticky="ew", padx=0, ipady=5)
 
@@ -285,8 +283,8 @@ class TeamDashboardView:
       
 
     def _on_tree_resize(self, event):
-    # 让 Name 与 Position 始终各占 50%
-        total = max(event.width - 2, 1)  # 去掉边线的微小误差
+
+        total = max(event.width - 2, 1)  
         col_w = total // 2
         try:
             self.player_tree.column("Name", width=col_w)
@@ -299,7 +297,6 @@ class TeamDashboardView:
         for i in self.player_tree.get_children():
             self.player_tree.delete(i)
 
-    # —— 插入真实玩家行 ——
         players = sorted(self.team.get_all_players().get_players(),
                         key=lambda p: p.get_full_name())
         for idx, p in enumerate(players):
@@ -310,13 +307,13 @@ class TeamDashboardView:
                 tags=(zebra,)
             )
 
-    # —— 追加占位行，直到达到 MIN_ROWS —— 
+
         total = len(self.player_tree.get_children())
         need = max(0, self.MIN_ROWS - total)
         for i in range(need):
             row_index = total + i
             zebra = "odd" if row_index % 2 else "even"
-            # 占位行 values 用空字符串；加上 'placeholder' tag 以便禁止选择
+ 
             self.player_tree.insert(
                 "", "end",
                 values=("", ""),
