@@ -1,17 +1,77 @@
 from tkinter import *
+from tkinter import ttk 
 from TkUtils import TkUtils as ut
-from ErrorView import ErrorView
 from model.exception.InvalidSigningException import InvalidSigningException
 from model.exception.FillException import FillException
+from ErrorView import ErrorView
 
 class TeamDashboardView:
 
-    def __init__(self, root, model):
+    def __init__(self, root, model, team):
         self.root = root
         self.model = model
         self.team = team
         self.selected_player_from_table = None
         self.root.protocol("WM_DELETE_WINDOW", self.close)
+        self.player_name_var = StringVar()
+        self.jersey_buttons = []
+        self.tooltip_text_funcs = [None] * 5
+
+    def setup(self):
+        self.root.title("Team Dashboard")
+        
+
+        team_jersey_path = f"image/{self.team.get_jersey_filename()}"
+        
+        self.team_jersey_img = ut.image(self.root, team_jersey_path, height=50, width=50).photo
+        self.no_team_jersey_img = ut.image(self.root, "image/none.png", height=50, width=50).photo
+
+        ut.image(self.root, "image/banner.png", width=800).pack()
+        ut.separator(self.root).pack(fill=X)
+        ut.label(self.root, str(self.team)).pack(pady=5)
+
+        sign_frame = Frame(self.root)
+        sign_frame.pack(pady=5)
+        ut.label(sign_frame, "Sign a new player:").pack(side=LEFT, padx=5)
+        sign_entry = Entry(sign_frame, textvariable=self.player_name_var, width=30)
+        sign_entry.pack(side=LEFT)
+        sign_entry.bind("<Return>", self.sign_player)
+        ut.button(sign_frame, "Sign", self.sign_player).pack(side=LEFT, padx=5)
+
+        content_frame = Frame(self.root)
+        content_frame.pack(fill=BOTH, expand=True, padx=10, pady=5)
+
+        table_frame = Frame(content_frame)
+        table_frame.pack(side=LEFT, fill=BOTH, expand=True)
+
+
+        self.player_tree = ut.treeview(table_frame, ["Name", "Position"])
+        self.player_tree.bind("<<TreeviewSelect>>", self.on_player_select)
+        self.player_tree.pack(fill=BOTH, expand=True)
+
+        active_team_frame = ttk.LabelFrame(content_frame, text="Active Team")
+        active_team_frame.pack(side=RIGHT, fill=BOTH, expand=True, padx=(10, 0))
+
+        positions_frame = Frame(active_team_frame)
+        positions_frame.pack(expand=True)
+
+        for i in range(5):
+            jersey_button = ut.button(positions_frame, "", lambda idx=i: self.on_jersey_click(idx))
+            jersey_button.config(image=self.no_team_jersey_img)
+            jersey_button.grid(row=i//3, column=i%3, padx=5, pady=5)
+            self.jersey_buttons.append(jersey_button)
+        
+        button_frame = Frame(self.root)
+        button_frame.pack(side=BOTTOM, fill=X, pady=5)
+        
+        self.unsign_button = ut.button(button_frame, "Unsign", self.unsign_player)
+        self.unsign_button.pack(side=LEFT, expand=True, fill=X)
+        self.unsign_button.config(state=DISABLED)
+
+        ut.button(button_frame, "Close", self.close).pack(side=LEFT, expand=True, fill=X)
+
+
+        self.update_view()
 
     def sign_player(self, event=None):
         player_name = self.player_name_var.get().strip()
@@ -76,58 +136,4 @@ class TeamDashboardView:
             self.player_tree.selection_remove(self.player_tree.selection())
 
 
-    def setup(self):
-        self.root.title("Team Dashboard")
-        self.player_name_var = StringVar()
-
-        team_jersey_path = f"image/{self.team.get_jersey_filename()}"
-        
-        self.team_jersey_img = ut.image(self.root, team_jersey_path, height=50, width=50).photo
-        self.no_team_jersey_img = ut.image(self.root, "image/none.png", height=50, width=50).photo
-
-        ut.image(self.root, "image/banner.png", width=800).pack()
-        ut.separator(self.root).pack(fill=X)
-        ut.label(self.root, str(self.team)).pack(pady=5)
-
-        sign_frame = Frame(self.root)
-        ut.label(sign_frame, "Sign a new player:").pack(side=LEFT, padx=5)
-        sign_entry = Entry(sign_frame, textvariable=self.player_name_var, width=30)
-        sign_entry.pack(side=LEFT)
-        sign_entry.bind("<Return>", self.sign_player)
-        ut.button(sign_frame, "Sign", self.sign_player).pack(side=LEFT, padx=5)
-        sign_frame.pack(pady=5)
-
-        main_frame = Frame(self.root)
-        left_frame = Frame(main_frame)
-        self.player_tree = ut.treeview(left_frame, ["Name", "Position"], width=400)
-        self.player_tree.bind("<ButtonRelease-1>", self.on_player_select)
-        self.player_tree.pack()
-        left_frame.pack(side=LEFT, padx=10, pady=5)
-
-        right_frame = Frame(main_frame)
-        ut.label(right_frame, "Active Team").pack()
-        
-        self.jersey_buttons = []
-        self.tooltip_text_funcs = [None] * 5
-        jersey_frame_top = Frame(right_frame)
-        jersey_frame_bottom = Frame(right_frame)
-
-        for i in range(5):
-            frame = jersey_frame_top if i < 3 else jersey_frame_bottom
-            btn = Button(frame, image=self.no_team_jersey_img, relief=FLAT, command=lambda i=i: self.on_jersey_click(i))
-            btn.pack(side=LEFT, padx=5, pady=5)
-            self.jersey_buttons.append(btn)
-            create_tooltip(btn, lambda i=i: self.tooltip_text_funcs[i]())
-        
-        jersey_frame_top.pack()
-        jersey_frame_bottom.pack()
-        right_frame.pack(side=LEFT, padx=10, fill=Y, pady=5)
-        main_frame.pack(pady=10, fill=BOTH, expand=True)
-
-        bottom_btn_frame = Frame(self.root)
-        self.unsign_button = ut.button(bottom_btn_frame, "Unsign", self.unsign_player)
-        self.unsign_button.pack(side=LEFT, expand=True, fill=X)
-        ut.button(bottom_btn_frame, "Close", self.close).pack(side=LEFT, expand=True, fill=X)
-        bottom_btn_frame.pack(fill=BOTH, side=BOTTOM, pady=(0, 10), padx=10)
-
-        self.update_view()
+    

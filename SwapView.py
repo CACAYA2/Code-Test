@@ -3,7 +3,7 @@ from TkUtils import TkUtils as ut
 
 class SwapView:
 
-    def __init__(self, root, model, observable_view):
+    def __init__(self, model, observable_view):
         self.model = model
         self.observable_view = observable_view 
         self.manager = self.model.get_logged_in_manager()
@@ -36,11 +36,11 @@ class SwapView:
         if not selected_item:
             return 
         
-        team_name_str = self.tree.item(selected_item[0])['values'][0]
-        local_name = team_name_str.split(" ")[0]
-        
-        team_to_swap = self.model.get_manageable_teams().team(local_name)
-        if team_to_swap:
-            self.model.set_manager_for_team(self.manager, team_to_swap)
-            self.observable_view.update_view() 
-            self.root.destroy()
+        team_name = self.tree.item(selection[0])['values'][0]
+        for team in self.model.get_manageable_teams().get_teams():
+            if str(team) == team_name:
+                self.model.set_manager_for_team(self.manager, team)
+                break
+                
+        self.observable_view.update_view()
+        self.root.destroy()

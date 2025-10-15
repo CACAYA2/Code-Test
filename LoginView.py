@@ -13,6 +13,9 @@ class LoginView:
         self.manager_id_var = StringVar()
         self.manager_id_var.trace_add("write", self.on_text_change)
 
+    def setup(self):
+        self.control()
+
     def login(self, event=None):
         if self.login_button['state'] == DISABLED:
             return
@@ -59,13 +62,15 @@ class LoginView:
 
         self.login_button = ut.button(btn_frame, "Login", self.login)
         self.login_button.grid(row=0, column=0, sticky="nsew") 
+        self.login_button.config(state=DISABLED)
         
         
         ut.button(btn_frame, "Exit", self.root.destroy).grid(row=0, column=1, sticky="nsew")
-        btn_frame.pack(side=BOTTOM, fill=X, expand=False)
+        
 
 
 if __name__ == "__main__":
     root = ut.root()
-    LoginView(root, league).control()
+    login_view = LoginView(root, league)
+    login_view.setup()
     root.mainloop()
