@@ -17,12 +17,22 @@ class ObservableButton(Label):
             foreground="white",
             background=self.main_color,
             pady=5,
+<<<<<<< HEAD
+=======
+            
+>>>>>>> 786b624 (test111)
         )
         self.bind("<Enter>", self.on_hover)
         self.bind("<Leave>", self.on_exit)
+<<<<<<< HEAD
         self.bind("<Button-1>", self.on_click)
 
     def on_hover(self, _):
+=======
+        self.bind("<Button-1>", self.on_click) 
+
+    def on_hover(self, event):
+>>>>>>> 786b624 (test111)
         self.config(background=self.hover_color)
 
     def on_exit(self, _):
@@ -33,6 +43,11 @@ class ObservableButton(Label):
             self.callback()
 
 
+<<<<<<< HEAD
+=======
+
+#You will never have to manually call this, It's used as part of one of the static methods
+>>>>>>> 786b624 (test111)
 class ToolTip:
     def __init__(self, widget):
         self.widget = widget
@@ -83,11 +98,19 @@ class TkUtils:
         window.title("Login")
         return window
 
+<<<<<<< HEAD
+=======
+    
+>>>>>>> 786b624 (test111)
     @staticmethod
     def top_level(title_, height=0):
         tl = Toplevel()
         tl.title(title_)
+<<<<<<< HEAD
         tl.configure(background="white")
+=======
+        tl.configure(background="#d9d9d9")
+>>>>>>> 786b624 (test111)
         return tl
 
     @staticmethod

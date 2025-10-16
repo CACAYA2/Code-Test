@@ -83,19 +83,19 @@ class League:
         for manager in self.managers:
             if manager.has_id(id):
                 return manager
-        raise UnauthorisedAccessException("Invalid manager credentials")
+        raise UnauthorisedAccessException("Invalid login credentials")
     
     def sign_player_to_team(self, player_name, team):
         player = self.players.player(player_name)
         
         if player is None:
-            raise InvalidSigningException(f"Player '{player_name}' does not exist in the league.")
+            raise InvalidSigningException(f"Player does not exist within the league.")
         
         if player.get_team() is not None:
             if player.get_team() == team:
-                raise InvalidSigningException(f"Player '{player_name}' is already signed to this team.")
+                raise InvalidSigningException(f"{player_name} is already signed to your team.")
             else:
-                raise InvalidSigningException(f"Player '{player_name}' is signed to a different club.")
+                raise InvalidSigningException(f"Cannot sign {player_name}, player is already signed to {player.get_team()}")
         
         team.add_player(player)
         player.set_team(team)
