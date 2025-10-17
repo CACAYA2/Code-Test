@@ -29,14 +29,7 @@ class League:
         self.logged_in_manager = manager
 
     def set_manager_for_team(self, manager, team):
-        """
-        Assigns a manager to a new team
-
-
-        Parameters:
-            manager (Manager.Manager): The manager to assign to the team
-            team (Team.Team): The team to assign to the manager
-        """
+       
         if manager is None or team is None:
             raise Exception("Team and Manager cannot be null")
         if team.get_manager() is not None:
@@ -50,11 +43,7 @@ class League:
         self.manageable_teams.remove(team)
 
     def withdraw_manager_from_team(self, manager):
-        """
-        Withdraws a manager from the team they are currently assigned to
-        Parameters:
-            manager (Manager.Manager): The manager to be withdrawn
-        """
+       
         if manager is None:
             raise Exception("Manager cannot be null")
         if manager.get_team() is None:
@@ -64,17 +53,7 @@ class League:
         manager.assign_team(None)
 
     def validate_manager(self, id):
-        """
-        Confirms that the id is a valid manager id
         
-
-        Parameters:
-            id (int): The id to compare with
-        Returns:
-            The Manager object with that id
-        Raises:
-            UnauthorisedAccessException: If there is no manager in the League with the provided id
-        """
         try:
             id = int(id)
         except (ValueError, TypeError):
@@ -83,19 +62,19 @@ class League:
         for manager in self.managers:
             if manager.has_id(id):
                 return manager
-        raise UnauthorisedAccessException("Invalid manager credentials")
+        raise UnauthorisedAccessException("Invalid login credentials")
     
     def sign_player_to_team(self, player_name, team):
         player = self.players.player(player_name)
         
         if player is None:
-            raise InvalidSigningException(f"Player '{player_name}' does not exist in the league.")
+            raise InvalidSigningException(f"Player {player_name} does not exist within the league.")
         
         if player.get_team() is not None:
             if player.get_team() == team:
-                raise InvalidSigningException(f"Player '{player_name}' is already signed to this team.")
+                raise InvalidSigningException(f"Player {player_name} is already signed to your team.")
             else:
-                raise InvalidSigningException(f"Player '{player_name}' is signed to a different club.")
+                raise InvalidSigningException(f"Cannot sign {player_name}, player is already signed to {str(player.get_team())}")
         
         team.add_player(player)
         player.set_team(team)

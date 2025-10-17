@@ -41,9 +41,22 @@ class Team:
         return player in self.current_team
 
     def assign_player_to_position(self, player, position_index):
-        if self.is_player_in_active_team(player) and self.current_team.index(player) != position_index:
-            raise FillException("This player is already assigned to another position.")
-        self.current_team[position_index] = player
+        try:
+            current_position_of_player = self.current_team.index(player)
+        except ValueError:
+            current_position_of_player = None 
+
+        player_at_destination = self.current_team[position_index]
+
+       
+        if current_position_of_player is not None and player_at_destination is None:
+            player_name = player.get_full_name()
+            raise FillException(f"{player_name} is already in the active playing team.")
+        
+       
+        if current_position_of_player is None:
+            self.current_team[position_index] = player
+     
 
     def unassign_player_from_position(self, position_index):
         self.current_team[position_index] = None

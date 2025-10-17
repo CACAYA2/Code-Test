@@ -1,12 +1,13 @@
-# TeamDashboardView.py - Final Layout Adjustments
 from tkinter import *
 from tkinter import ttk
 from PIL import Image, ImageTk
-from TkUtils import TkUtils as ut
+from TkUtils import TkUtils as ut, create_tooltip
 from model.exception.InvalidSigningException import InvalidSigningException
 from model.exception.FillException import FillException
 from ErrorView import ErrorView
+import os
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class TeamDashboardView:
@@ -23,7 +24,6 @@ class TeamDashboardView:
 
         self.root.protocol("WM_DELETE_WINDOW", self.close)
 
-        # Color palette from previous refinement
         self.COLOR_BG = "#FFFFFF"
         self.COLOR_TEXT = "#202020"
         self.COLOR_BORDER = "#DCDCDC"
@@ -31,29 +31,33 @@ class TeamDashboardView:
         self.COLOR_ACCENT = "#0078D7"
         self.COLOR_ACCENT_FG = "#FFFFFF"
         self.COLOR_PINK = "#E87A7A"
+
+    def get_jersey_tooltip_text(self, idx):
+        player = self.team.get_current_team()[idx]
+        if player:
+            return f"{player.get_full_name()}\nPosition: {str(player.get_position())}"
+        else:
+            return "Unallocated"
         
 
     def setup(self):
         self.root.title("Team Dashboard")
-        self.root.geometry("1024x768")
-        self.root.minsize(980, 720)
+        self.root.geometry("730x790")
+        self.root.minsize(695,750)
         self.root.configure(bg=self.COLOR_BG)
 
-        # Main layout grid
         self.root.grid_columnconfigure(0, weight=1)
         self.root.grid_rowconfigure(1, weight=1) # The content row will expand
 
-        # ============================ HEADER ============================
         header = Frame(self.root, bg=self.COLOR_BG, borderwidth=0, highlightthickness=0)
         
         header.grid(row=0, column=0, sticky="ew")
         header.grid_columnconfigure(0, weight=1)
-
-       
-        
-
         self._banner_target_h = 200
-        self._banner_img_orig = Image.open("image/banner.png")  
+
+        banner_path = os.path.join(SCRIPT_DIR, "image/banner.png")
+        self._banner_img_orig = Image.open(banner_path)
+ 
         self._banner_lbl = Label(header, bg=self.COLOR_BG, bd=0, highlightthickness=0)
         self._banner_lbl.pack(fill="x")  
         Frame(header, bg="black", height=1, bd=0, highlightthickness=0).pack(fill="x")
@@ -76,20 +80,17 @@ class TeamDashboardView:
         
         ttk.Separator(header, orient='horizontal', style="Black.TSeparator").pack(fill='x',pady=(5, 15))
 
-        # ============================ CONTENT BODY ============================
         content = Frame(self.root, bg=self.COLOR_BG)
         content.grid(row=1, column=0, sticky="nsew", padx=20, pady=10)
         content.grid_columnconfigure(0, weight=40)
         content.grid_columnconfigure(1, weight=60)
         content.grid_rowconfigure(1, weight=1)
 
-        # --- Sign Player Row ---
-        # REFINED: 1. Center the "Sign a new player" section.
-        # The outer frame spans the grid, and the inner frame uses pack() to center its contents by default.
+       
         sign_row_container = Frame(content, bg=self.COLOR_BG)
         sign_row_container.grid(row=0, column=0, columnspan=2, pady=(5, 15))
         sign_row = Frame(sign_row_container, bg=self.COLOR_BG)
-        sign_row.pack() # This pack() call centers the sign_row frame
+        sign_row.pack() 
 
         Label(sign_row, text="Sign a new player:", bg=self.COLOR_BG,
             fg=self.COLOR_PINK, font=("Helvetica", 16, "bold")).pack(side=LEFT, padx=(0, 10)) 
@@ -175,15 +176,6 @@ class TeamDashboardView:
 
 
 
-
-
-
-        
-        # In TeamDashboardView.py
-
-        # --- Right Panel: Active Team ---
-
-        
         right_panel = Frame(content, bg=self.COLOR_BG, highlightbackground=self.COLOR_BORDER, highlightthickness=1)
         right_panel.grid(row=1, column=1, sticky="nsew", padx=(10, 0))
         right_panel.grid_columnconfigure(0, weight=1)
@@ -209,6 +201,8 @@ class TeamDashboardView:
         for c in (0, 4): gridf.grid_columnconfigure(c, weight=1)
         for r in (0, 2): gridf.grid_rowconfigure(r, weight=1)
         jersey_pos = [(0, 2), (1, 1), (1, 2), (1, 3), (2, 2)]
+
+
         for i in range(5):
             btn = ut.button(gridf, "", lambda idx=i: self.on_jersey_click(idx))
             btn.config(image=self.no_team_jersey_img, background=self.COLOR_BG, borderwidth=0, highlightthickness=0)
@@ -216,9 +210,11 @@ class TeamDashboardView:
             btn.unbind("<Leave>")
             r, c = jersey_pos[i]
             btn.grid(row=r, column=c, padx=10, pady=10)
+            
+            create_tooltip(btn, lambda idx=i: self.get_jersey_tooltip_text(idx))
+            
             self.jersey_buttons.append(btn)
 
-        # ============================ FOOTER ============================
         footer = Frame(self.root, bg=self.COLOR_BG)
 
         footer.grid(row=2, column=0, sticky="ew", padx=0, pady=(10, 0))
@@ -230,6 +226,7 @@ class TeamDashboardView:
 
         self.unsign_button = ut.button(footer, "Unsign", self.unsign_player)
         self.unsign_button.grid(row=0, column=0, sticky="ew", padx=0, ipady=5)
+        self.unsign_button.config(state=DISABLED)
 
         close_btn = ut.button(footer, "Close", self.close)
         close_btn.grid(row=0, column=1, sticky="ew", padx=0, ipady=5)
@@ -328,6 +325,7 @@ class TeamDashboardView:
             self.jersey_buttons[i].config(image=img)
 
         self.selected_player_from_table = None
+        self.unsign_button.config(state=DISABLED)
         
         if self.player_tree.selection():
             self.player_tree.selection_remove(self.player_tree.selection())

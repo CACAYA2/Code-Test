@@ -13,11 +13,9 @@ class ManagerDashboardView:
     def setup(self):
         self.root.title("Manager Dashboard")
         
-        # Load images
         team = self.manager.get_team()
         self.no_team_jersey_img = ut.image(self.root, "image/none.png", height=150, width=150).photo
 
-        # Setup UI
         ut.image(self.root, "image/banner.png").pack()
         ut.separator(self.root).pack(fill=X)
         
@@ -33,25 +31,6 @@ class ManagerDashboardView:
 
 
 
-
-
-        
-
-
-        # button_frame = Frame(self.root)
-        # button_frame.pack(side=BOTTOM, fill=X)
-        
-        # self.withdraw_button = ut.button(button_frame, "Withdraw", self.withdraw)
-        # self.withdraw_button.pack(side=LEFT, expand=True, fill=X)
-        
-        # self.manage_button = ut.button(button_frame, "Manage", self.manage_team)
-        # self.manage_button.pack(side=LEFT, expand=True, fill=X)
-        
-        # ut.button(button_frame, "Swap Team", self.swap_team).pack(side=LEFT, expand=True, fill=X)
-        # ut.button(button_frame, "Close", self.close).pack(side=LEFT, expand=True, fill=X)
-        
-        # 1. Frame for Withdraw and Manage buttons (under jersey icon)
-
         jersey_button_frame = Frame(self.root)
         jersey_button_frame.pack(pady=(0, 10))
         
@@ -64,11 +43,9 @@ class ManagerDashboardView:
         self.manage_button = ut.button(jersey_button_frame, "Manage", self.manage_team)
         self.manage_button.pack(side=LEFT, padx=(0, 5),ipadx=20)
         
-        # 2. Frame for Swap Team and Close buttons (at the bottom, filling X, equal size)
         bottom_frame = Frame(self.root)
         bottom_frame.pack(side=BOTTOM, fill=X, expand=False)
         
-        # Configure grid to ensure two columns of equal weight
         bottom_frame.grid_columnconfigure(0, weight=1)
         bottom_frame.grid_columnconfigure(1, weight=1)
         
@@ -91,8 +68,7 @@ class ManagerDashboardView:
         if self.manager.get_team():
             self.root.withdraw()
             new_root = ut.top_level("Team Dashboard")
-            # new_root.geometry("800x600")
-            # Pass only three arguments: root, model, and team
+            
             TeamDashboardView(new_root, self.model, self.manager.get_team()).setup()
     
     def swap_team(self):
@@ -115,4 +91,5 @@ class ManagerDashboardView:
             self.manage_button.config(state=DISABLED)
 
     def close(self):
-        self.root.master.destroy()
+        self.root.master.deiconify() 
+        self.root.destroy()

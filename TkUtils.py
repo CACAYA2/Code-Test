@@ -3,6 +3,8 @@ from tkinter import ttk
 from PIL import Image, ImageTk, UnidentifiedImageError
 import os
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 
 class ObservableButton(Label):
   
@@ -46,7 +48,7 @@ class ToolTip:
             x, y, _, _ = self.widget.bbox("insert")
         except Exception:
             x, y = 0, 0
-        x = x + self.widget.winfo_rootx() + 25
+        x = x + self.widget.winfo_rootx() + 37
         y = y + self.widget.winfo_rooty() + 20
         self.tip_window = tw = Toplevel(self.widget)
         tw.wm_overrideredirect(1)
@@ -126,10 +128,12 @@ class TkUtils:
         if background:
             lbl.configure(background=background)
 
+        full_path = os.path.join(SCRIPT_DIR, path)
+
         try:
-            if not os.path.exists(path):
-                raise FileNotFoundError(path)
-            img = Image.open(path).resize((width, height))
+            if not os.path.exists(full_path):
+                raise FileNotFoundError(full_path)
+            img = Image.open(full_path).resize((width, height))
             image_ = ImageTk.PhotoImage(img)
             lbl.config(image=image_)
             lbl.photo = image_
@@ -139,8 +143,6 @@ class TkUtils:
             lbl.photo = None
 
         return lbl
-
-       
 
    
 
